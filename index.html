@@ -60,6 +60,19 @@
   .result p {
     font-size: 16px;
     line-height: 1.5;
+    margin-bottom: 20px;
+  }
+  .retry-btn {
+    padding: 12px 20px;
+    font-size: 15px;
+    border: none;
+    border-radius: 8px;
+    background: #c2185b;
+    color: #fff;
+    cursor: pointer;
+  }
+  .retry-btn:hover {
+    opacity: 0.9;
   }
 </style>
 </head>
@@ -73,6 +86,7 @@
   <div class="result" id="result">
     <h2 id="result-title"></h2>
     <p id="result-text"></p>
+    <button class="retry-btn" onclick="restartQuiz()">Take Again</button>
   </div>
 </div>
 
@@ -126,8 +140,8 @@ const questions = [
   }
 ];
 
-/* ================= 결과 (40가지) ================= */
-  const results = {
+/* ================= 결과 ================= */
+const results = {
   "plain+fruit":"You value simplicity and natural balance. You’re honest, grounded, and appreciate a calm, well-balanced daily life.",
   "plain+cookie":"You enjoy comfort with a touch of wit. You prefer things simple, but you never miss a bit of fun.",
   "plain+candy":"You may seem calm at first, but you have a surprising playful side. You’re great at finding joy in small moments.",
@@ -218,11 +232,22 @@ function showResult() {
 
   const key = `${topFlavor}+${topTopping}`;
 
-  document.getElementById("quiz").style.display = "none";
+  quiz.style.display = "none";
+  progress.style.display = "none";
   document.getElementById("result").style.display = "block";
-  document.getElementById("result-title").innerText = `${topFlavor.toUpperCase()} + ${topTopping.toUpperCase()}`;
+  document.getElementById("result-title").innerText =
+    `${topFlavor.toUpperCase()} + ${topTopping.toUpperCase()}`;
   document.getElementById("result-text").innerText =
     results[key] || "You're a unique mix—just like your yogurt!";
+}
+
+function restartQuiz() {
+  index = 0;
+  answers = [];
+  quiz.style.display = "block";
+  progress.style.display = "block";
+  document.getElementById("result").style.display = "none";
+  renderQuestion();
 }
 
 renderQuestion();
