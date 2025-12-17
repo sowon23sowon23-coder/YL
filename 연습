@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Yogurtland Taste Test</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #fff8f6;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+  }
+  .container {
+    max-width: 520px;
+    margin: auto;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 14px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  }
+  h1 {
+    text-align: center;
+    color: #c2185b;
+    margin-bottom: 10px;
+  }
+  .progress {
+    text-align: center;
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 15px;
+  }
+  .question {
+    font-size: 18px;
+    margin-bottom: 15px;
+  }
+  .options button {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    border: none;
+    background: #f4f4f4;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .options button:hover {
+    background: #ffe1ec;
+  }
+  .result {
+    display: none;
+    text-align: center;
+  }
+  .result h2 {
+    color: #c2185b;
+  }
+  .result p {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+</style>
+</head>
+
+<body>
+<div class="container">
+  <h1>🍦 Yogurtland Taste Test</h1>
+  <div class="progress" id="progress"></div>
+  <div id="quiz"></div>
+
+  <div class="result" id="result">
+    <h2 id="result-title"></h2>
+    <p id="result-text"></p>
+  </div>
+</div>
+
+<script>
+/* ================= 질문 ================= */
+const questions = [
+  {
+    q: "Q1. When do you most often come to Yogurtland?",
+    options: [
+      { text: "To refresh my mood", group: "plain" },
+      { text: "To hang out with friends", group: "strawberry" },
+      { text: "When I crave something rich", group: "chocolate" },
+      { text: "To try something new", group: "pistachio" }
+    ]
+  },
+  {
+    q: "Q2. What taste are you craving lately?",
+    options: [
+      { text: "Plain & tart", group: "plain" },
+      { text: "Sweet & fruity", group: "strawberry" },
+      { text: "Rich dessert flavor", group: "cheesecake" },
+      { text: "Deep chocolatey taste", group: "chocolate" }
+    ]
+  },
+  {
+    q: "Q3. Where do you go first inside Yogurtland?",
+    options: [
+      { text: "Check everything first", group: "rocket" },
+      { text: "Go straight to my favorite", group: "cookie" },
+      { text: "Follow the popular flavors", group: "redvelvet" },
+      { text: "Sample before deciding", group: "plain" }
+    ]
+  },
+  {
+    q: "Q4. First topping you grab?",
+    options: [
+      { text: "Fresh fruits", group: "fruit" },
+      { text: "Cookie chunks", group: "cookie" },
+      { text: "Candy or chocolate", group: "candy" },
+      { text: "Nuts or granola", group: "nuts" }
+    ]
+  },
+  {
+    q: "Q5. Which describes you best?",
+    options: [
+      { text: "Calm and balanced", group: "plain" },
+      { text: "Bright and social", group: "rocket" },
+      { text: "Creative and unique", group: "pistachio" },
+      { text: "Warm and dependable", group: "cheesecake" }
+    ]
+  }
+];
+
+/* ================= 결과 (40가지) ================= */
+const results = {
+  "plain+fruit":"당신은 깔끔함과 자연스러움을 사랑하는 타입. 꾸밈없이 솔직하고, 일상에서 균형을 중요하게 생각해요.",
+  "plain+cookie":"단순함 속에 위트를 담은 당신! 편안함을 추구하지만 가끔은 작은 재미도 놓치지 않아요.",
+  "plain+candy":"차분해 보이지만 의외의 반전 매력이 있는 사람. 소소한 즐거움을 잘 발견해요.",
+  "plain+nuts":"자기관리와 안정감을 중시하는 타입. 신뢰받는 사람이라는 말을 자주 들어요.",
+  "plain+syrup":"조용하지만 감성적인 성향. 혼자만의 시간을 소중히 여겨요.",
+
+  "strawberry+fruit":"상큼하고 다정한 분위기의 소유자! 사람들과 자연스럽게 잘 어울려요.",
+  "strawberry+cookie":"귀엽고 친근한 성격으로, 주변에 웃음을 주는 타입이에요.",
+  "strawberry+candy":"밝고 유쾌한 에너지가 넘치는 사람. 분위기 메이커 역할을 해요.",
+  "strawberry+nuts":"활기차면서도 건강한 균형을 중시하는 성향이에요.",
+  "strawberry+syrup":"따뜻한 감성과 섬세한 배려가 돋보이는 타입이에요.",
+
+  "redvelvet+fruit":"감각적이면서도 섬세한 취향의 소유자. 은근한 매력이 있어요.",
+  "redvelvet+cookie":"트렌디하고 개성이 뚜렷한 사람. 자기 표현에 능해요.",
+  "redvelvet+candy":"화려하고 자신감 넘치는 타입. 주목받는 걸 즐겨요.",
+  "redvelvet+nuts":"겉은 화려하지만 내면은 진중한 성향이에요.",
+  "redvelvet+syrup":"디테일과 완성도를 중요하게 여기는 감성파예요.",
+
+  "cheesecake+fruit":"부드럽고 안정적인 분위기의 사람. 편안함을 줘요.",
+  "cheesecake+cookie":"자연스럽고 믿음직한 매력의 소유자예요.",
+  "cheesecake+candy":"긍정적인 에너지로 주변을 밝히는 타입이에요.",
+  "cheesecake+nuts":"현실적이고 균형 잡힌 사고를 가진 사람이에요.",
+  "cheesecake+syrup":"여유롭고 성숙한 감각의 소유자예요.",
+
+  "cookie+fruit":"호기심 많고 다정한 성격. 다양한 경험을 즐겨요.",
+  "cookie+cookie":"장난기 많고 유쾌한 분위기의 사람이에요.",
+  "cookie+candy":"에너지 넘치는 성향. 늘 재미를 찾아다녀요.",
+  "cookie+nuts":"귀엽지만 책임감 있는 든든한 타입이에요.",
+  "cookie+syrup":"부드러운 매력과 감성을 함께 가진 사람이에요.",
+
+  "chocolate+fruit":"강렬하면서도 의외로 섬세한 반전 매력의 소유자예요.",
+  "chocolate+cookie":"주도적이고 자신감 있는 리더형이에요.",
+  "chocolate+candy":"직선적이고 당당한 성격으로 존재감이 커요.",
+  "chocolate+nuts":"묵직하고 신뢰감 있는 타입이에요.",
+  "chocolate+syrup":"강함과 섬세함을 동시에 가진 균형형이에요.",
+
+  "pistachio+fruit":"독특하면서도 감성적인 취향을 가진 사람이에요.",
+  "pistachio+cookie":"개성과 친근함을 동시에 가진 매력적인 타입이에요.",
+  "pistachio+candy":"창의적이고 에너지 넘치는 스타일이에요.",
+  "pistachio+nuts":"조용히 자기 길을 가는 집중형 타입이에요.",
+  "pistachio+syrup":"감성적이고 깊은 사고를 즐기는 사람이에요.",
+
+  "rocket+fruit":"자유롭고 활기찬 에너지가 넘쳐요.",
+  "rocket+cookie":"호기심 많고 모험을 즐기는 성향이에요.",
+  "rocket+candy":"활발한 분위기 메이커 타입이에요.",
+  "rocket+nuts":"유쾌하지만 균형 감각이 뛰어나요.",
+  "rocket+syrup":"화려함 속에 감성을 지닌 스타일이에요."
+};
+
+/* ================= 로직 ================= */
+let index = 0;
+let answers = [];
+
+const quiz = document.getElementById("quiz");
+const progress = document.getElementById("progress");
+
+function renderQuestion() {
+  progress.innerText = `Question ${index + 1} / 5`;
+  quiz.innerHTML = `
+    <div class="question">${questions[index].q}</div>
+    <div class="options">
+      ${questions[index].options.map(o =>
+        `<button onclick="selectAnswer('${o.group}')">${o.text}</button>`
+      ).join("")}
+    </div>
+  `;
+}
+
+function selectAnswer(group) {
+  answers.push(group);
+  index++;
+  if (index < questions.length) {
+    renderQuestion();
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  const count = {};
+  answers.forEach(a => count[a] = (count[a] || 0) + 1);
+
+  const flavors = ["plain","strawberry","redvelvet","cheesecake","cookie","chocolate","pistachio","rocket"];
+  const toppings = ["fruit","cookie","candy","nuts","syrup"];
+
+  let topFlavor = flavors.sort((a,b)=>(count[b]||0)-(count[a]||0))[0];
+  let topTopping = toppings.sort((a,b)=>(count[b]||0)-(count[a]||0))[0];
+
+  const key = `${topFlavor}+${topTopping}`;
+
+  document.getElementById("quiz").style.display = "none";
+  document.getElementById("result").style.display = "block";
+  document.getElementById("result-title").innerText = `${topFlavor.toUpperCase()} + ${topTopping.toUpperCase()}`;
+  document.getElementById("result-text").innerText =
+    results[key] || "You're a unique mix—just like your yogurt!";
+}
+
+renderQuestion();
+</script>
+</body>
+</html>
